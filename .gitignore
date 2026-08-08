@@ -3,3 +3,14 @@ dist/
 *.zxp
 *.ccx
 .env
+
+# Backups y temporales
+*.bak
+*.tmp
+*~
+temp/
+tmp/
+*.log
+logs/
+backup/
+backups/

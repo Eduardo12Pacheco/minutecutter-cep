@@ -1,115 +1,107 @@
-# Premiere Pro Extension
+# Minute Cutter — Panel CEP para Premiere Pro
 
-Development environment and scaffolding for a Premiere Pro extension.
+Panel CEP para Premiere Pro que recorta rangos de un clip de video **directamente desde el material fuente** (tiempos de fuente, no de timeline) en una sola operación, con corte de audio vinculado, cierre del hueco (ripple) y escala automática de los pedazos resultantes.
 
-## Prerequisites (Windows)
+## Qué hace
 
-Verified versions installed on this machine (2026-08-07):
+- Se elige un clip en el timeline (o en el Proyecto si ya existe una instancia en el timeline).
+- Se cargan una o más filas con rangos `Inicio` / `Fin`.
+- Al presionar **Cortar**, la extensión:
+  1. Crea un *subclip* por cada rango conservado (basado en el material fuente del clip).
+  2. Elimina el clip original (video y audio vinculado).
+  3. Inserta los subclips en la posición original.
+  4. Aplica **escala automática 140 %** a cada pedazo.
+  5. Corre los clips posteriores para cerrar el hueco (ripple).
 
-| Tool | Version | Notes |
-|---|---|---|
-| Git | 2.55.0.windows.3 | `user.name` / `user.email` configured |
-| Node.js | 22.20.0 (system) / 22.23.2 (fnm default) | system install is winget-managed; 22.23.2 was installed via fnm because the winget upgrade requires elevation |
-| npm | 11.19.0 | npm@12 requires Node >= 22.22.2; npm@11 is the last line compatible with the system Node 22.20.0 |
-| Python | 3.11.9 / 3.13.14 / 3.14.6 | `py` launcher default is 3.14; `python` resolves to 3.11 by PATH order |
-| FFmpeg | 9.0 (full) | `Gyan.FFmpeg` |
-| VS Code | 1.130.0 | |
-| PowerShell | 7.6.4 | |
-| Scoop | 0.5.3 | per-user package manager (no admin required) |
-| winget | 1.29.280 | |
-| UXP Devtools CLI | 1.2.0 | `@adobe/uxp-devtools-cli` (global npm) |
+## Hosts soportados
 
-## Target host: Adobe Premiere Pro
+| Componente | Versión |
+|---|---|
+| Premiere Pro | 22.x (verificado en 22.5.0) — manifest `[22.0, 22.9]` |
+| Runtime | CEP 12 (CSXS 11) |
+| Sistema | Windows |
 
-- Installed version: **Premiere Pro 2022 (22.5.0)**
-- **UXP is NOT supported on Premiere 22.5.** UXP plugins require Premiere **v25.6 or later** (per Adobe: "UXP plugins are supported in Premiere v25.6 and later since UDT v2.2").
-- **CEP is supported** on this install (extension folder exists at `%APPDATA%\Adobe\CEP\extensions`).
+## Instalación (Windows)
 
-### Decision: CEP over UXP for this host
-
-| | CEP | UXP |
-|---|---|---|
-| Works on Premiere 22.5 | Yes | No (requires 25.6+) |
-| Runtime | Chromium 85 embedded (CEP 12) | UXP runtime |
-| API model | HTML/JS panel + ExtendScript (`$.` / `app` host object) | Modern JS, async |
-| Distribution | `.zxp` (signed) or dev mode | `.ccx` |
-| Future-proof | Being phased out | Preferred by Adobe for new plugins |
-
-**Recommendation:** build the extension as a **CEP 12 panel** so it works on the installed Premiere Pro. Structure the code so the UI layer can later be ported to UXP when/if the host is upgraded to v25.6+.
-
-## UXP Developer Tool (UDT)
-
-The official GUI tool is **not distributed via winget** and **requires administrator privileges** to run. Install it from Creative Cloud:
-
-1. Open the Adobe Creative Cloud desktop app.
-2. Search for **"UXP Developer Tools"** in *All apps*.
-3. Click **Install**.
-
-On first launch it prompts to **Enable Developer Mode**, which requests elevated permissions.
-
-### CLI alternative (installed)
-
-The `uxp` CLI (`@adobe/uxp-devtools-cli`) is installed globally and does not require the GUI:
-
-```bash
-uxp --help
-uxp apps list          # list UXP-capable Adobe apps (needs the dev service running)
-uxp plugin load --id <pluginId> <path>
-uxp plugin reload --id <pluginId>
-uxp plugin unload --id <pluginId>
-uxp plugin package --id <pluginId> --destination <outDir>
-uxp service start      # starts the UXP dev service (requires admin on Windows)
-```
-
-> **Note (Windows):** `uxp service start` and `uxp devtools enable` write to
-> `%CommonProgramFiles%\Adobe\UXP\Developer\settings.json` and therefore require an
-> **elevated** terminal. Also, `uxp apps list` reports no apps on hosts below UXP 5.0
-> (Premiere 22.5 is below that), so this CLI is only usable once a UXP-capable host exists.
-
-## Loading a CEP extension (development mode)
-
-1. Install the plugin into the user extensions folder:
+1. Cerrá Premiere Pro por completo.
+2. Copiá el contenido de la carpeta `extension` a la carpeta de extensiones de usuario:
 
    ```powershell
-   New-Item -ItemType Directory -Force "$env:APPDATA\Adobe\CEP\extensions\<com.example.myext>"
-   Copy-Item -Recurse -Force .\src "$env:APPDATA\Adobe\CEP\extensions\<com.example.myext>\"
+   Copy-Item -Recurse -Force .\extension\* "$env:APPDATA\Adobe\CEP\extensions\com.pelot.minutecutter\"
    ```
 
-2. For CEP 12 hosts, enable unsigned-extensions debugging by creating:
-
-   `%APPDATA%\Adobe\CEP\extensions\.debug` containing:
+   La estructura instalada debe quedar:
 
    ```
-   <com.example.myext>
+   %APPDATA%\Adobe\CEP\extensions\com.pelot.minutecutter\
+   ├── CSXS\manifest.xml
+   ├── client\index.html, index.css, index.js
+   └── host\main.jsx
    ```
 
-3. Launch Premiere Pro. The panel appears under **Window > Extensions**.
+3. Habilitá extensiones CEP sin firmar creando la clave de registro `PlayerDebugMode`:
 
-4. During development, reload the extension from the panel's context menu (or restart Premiere).
+   ```
+   HKEY_CURRENT_USER\Software\Adobe\CSXS.11
+   Valor: PlayerDebugMode  (REG_SZ)  =  1
+   ```
 
-## Loading a UXP plugin (once host >= 25.6)
+   Desde PowerShell (una sola vez):
+
+   ```powershell
+   New-Item -Path "HKCU:\Software\Adobe\CSXS.11" -Force | Out-Null
+   Set-ItemProperty -Path "HKCU:\Software\Adobe\CSXS.11" -Name "PlayerDebugMode" -Value "1"
+   ```
+
+4. Reabrí Premiere Pro. El panel aparece en **Window > Extensions > Minute Cutter**.
+
+> El path del host (`host/main.jsx`) se deriva en runtime desde la URL del panel; no quedan rutas de usuario hardcodeadas.
+
+## Flujo de uso
+
+1. Abrí el panel **Minute Cutter** (Window > Extensions).
+2. Seleccioná un **clip de video** en el timeline (o en el Proyecto si ya tiene una instancia en el timeline).
+3. Cargá una o más filas con los rangos a conservar. Cada fila tiene `Inicio` y `Fin`.
+4. Presioná **Cortar**.
+5. El estado de la operación se muestra en la barra inferior del panel.
+
+## Formato de tiempos
+
+- Formato `mm:ss` (ej. `1:20`, `2:05`). También acepta más segmentos (ej. `1:20:30` = 1 h 20 m 30 s).
+- **Los tiempos son de fuente**, es decir relativos al material del clip (inPoint/outPoint del clip), no a la posición en el timeline.
+- `Fin` debe ser mayor que `Inicio` y no puede superar la duración del material fuente del clip.
+
+## Detalles de comportamiento
+
+- **Audio / ripple:** el audio vinculado al video seleccionado se corta junto con este. Los clips posteriores se desplazan para cerrar el hueco.
+- **Escala automática 140 %:** cada pedazo conservado se ajusta al tamaño del frame y se le aplica `Scale = 140`.
+
+## Limitaciones conocidas
+
+- Solo se admiten clips a **velocidad 1x (100 %)**. No se admiten velocidad 0, ni velocidad distinta de 1x, ni clips en **reversa**.
+- Una **selección de Proyecto** (BIN) sin instancia en el timeline no se puede cortar: primero debe existir una instancia del clip en el timeline. En ese caso el panel avisa que primero hay que insertarlo.
+- Si hay **audio sincronizado no seleccionado** en la posición del clip, el corte se rechaza y se pide seleccionar video + audio juntos.
+- Depende de que el host exponga ciertas APIs (crear subclips, remover/insertar clips, mover). Si el build no las expone, el corte se aborta con un mensaje claro y sin tocar el timeline (o reintentando restaurar, con aviso de usar Ctrl+Z si el rollback quedó incompleto).
+
+## Volver a una versión estable
+
+Cada versión estable publicada lleva un tag. Para volver a la versión estable desde una copia de trabajo o tras probar cambios:
 
 ```bash
-# with the UDT service running (admin terminal):
-uxp plugin load --id <pluginId> "C:\dev\premiere-ext"
+git checkout v1.0.0
 ```
 
-Then open the UXP Developer Tool, select the plugin, and click **Add** / **Load**.
+Si se quiere re-instalar en Premiere después de un checkout, repetí el paso de copia de `extension` a `%APPDATA%\Adobe\CEP\extensions\com.pelot.minutecutter` y reiniciá Premiere.
 
-## Project layout
+## Estructura del repo
 
 ```
 premiere-ext/
-├── src/                  # extension source (UI + host integration)
+├── extension/
+│   ├── CSXS/manifest.xml
+│   ├── client/          # panel (index.html, index.css, index.js)
+│   └── host/            # lógica ExtendScript (main.jsx)
+├── .gitignore
 ├── README.md
-└── package.json          # dev/build tooling
+└── package.json         # tooling de dev (scaffold)
 ```
-
-## Tooling decisions
-
-- **Package manager:** Scoop (per-user, no admin) alongside winget for machine-wide apps.
-- **npm:** pinned to the npm@11 line because npm@12 requires Node >= 22.22.2, and the
-  system Node is managed by winget (elevated updates only). Use `fnm use 22.23.2` (or
-  upgrade Node via winget from an elevated terminal) to unlock npm@12. If you update
-  Node to a newer LTS (24.x) or current (26.x), you can then `npm install -g npm@latest`.
-- **ffmpeg:** required for media/generation tests on the video side.

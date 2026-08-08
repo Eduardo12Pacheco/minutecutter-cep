@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="index.css">
+</head>
+<body>
+	<div class="topbar">
+		<span class="title">Minute Cutter</span>
+	</div>
+	<div class="clipbox">
+		<span id="clipInfo" class="clipinfo">Sin clip seleccionado</span>
+	</div>
+
+	<div class="tableWrap">
+		<table id="rangeTable">
+			<thead>
+				<tr>
+					<th class="col-num">N°</th>
+					<th class="col-min">Minuto</th>
+					<th class="col-del"></th>
+				</tr>
+			</thead>
+			<tbody id="tbody"></tbody>
+		</table>
+	</div>
+
+	<div class="hint">Formato: minutos:segundos — ej. 1:20 o 1:20:30</div>
+
+	<div class="actions">
+		<button id="addRow" class="btn ghost">+ Agregar fila</button>
+		<button id="cutBtn" class="btn primary">Cortar</button>
+	</div>
+	<div id="status" class="status"></div>
+
+	<script src="index.js"></script>
+</body>
+</html>
