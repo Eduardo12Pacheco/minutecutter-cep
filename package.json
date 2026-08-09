@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/dev.js",
-    "package": "node scripts/package.js"
+    "package": "node scripts/package.js",
+    "test": "node tests/harness.js"
   },
   "engines": {
     "node": ">=22"
