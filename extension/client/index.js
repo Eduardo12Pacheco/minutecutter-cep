@@ -7,6 +7,7 @@
 	var clipInfoEl = document.getElementById('clipInfo');
 
 	var selectedInfo = null; // { name, durationSeconds }
+	var selectedKind = null; // 'TIMELINE' | 'BIN' | 'NONE'
 
 	// --- Bootstrap automático del host (invisible, sin botón Diag) ---
 	var hostReady = false;
@@ -208,6 +209,7 @@
 
 					if (head === 'ERR') {
 						selectedInfo = null;
+						selectedKind = 'NONE';
 						clipInfoEl.textContent = rest || 'Error leyendo la selección';
 						clipInfoEl.className = 'clipinfo none';
 						cutBtn.disabled = true;
@@ -217,6 +219,7 @@
 					if (head !== 'OK') {
 						if (bar < 0) {
 							selectedInfo = null;
+							selectedKind = 'NONE';
 							clipInfoEl.textContent = 'Error del host: ' + s;
 							clipInfoEl.className = 'clipinfo none';
 							cutBtn.disabled = true;
@@ -224,6 +227,7 @@
 							return;
 						}
 						selectedInfo = null;
+						selectedKind = 'NONE';
 						clipInfoEl.textContent = 'Sin clip seleccionado. Elegí un clip en el timeline o en el proyecto.';
 						clipInfoEl.className = 'clipinfo none';
 						cutBtn.disabled = true;
@@ -238,18 +242,21 @@
 
 					if (kind === 'TIMELINE') {
 						selectedInfo = { name: name, durationSeconds: dur };
+						selectedKind = 'TIMELINE';
 						clipInfoEl.textContent = 'Clip: ' + name + '  —  Duración: ' + formatTime(dur);
 						clipInfoEl.className = 'clipinfo';
 						cutBtn.disabled = false;
 						if (showLog) log('Clip listo para cortar');
 					} else if (kind === 'BIN') {
 						selectedInfo = null;
+						selectedKind = 'BIN';
 						clipInfoEl.textContent = 'Clip de Proyecto detectado; para cortar, primero debe existir en timeline';
 						clipInfoEl.className = 'clipinfo none';
 						cutBtn.disabled = true;
 						if (showLog) log('Clip de Proyecto detectado; para cortar, primero debe existir en timeline');
 					} else {
 						selectedInfo = null;
+						selectedKind = 'NONE';
 						clipInfoEl.textContent = 'Sin clip seleccionado. Elegí un clip en el timeline o en el proyecto.';
 						clipInfoEl.className = 'clipinfo none';
 						cutBtn.disabled = true;
@@ -289,6 +296,42 @@
 					log('Error: ' + (rest || s), true);
 				}
 			}, 60000);
+		}, true);
+	});
+
+	var shotsBtn = document.getElementById('shotsBtn');
+	var shotsSelect = document.getElementById('shotsSensitivity');
+
+	shotsBtn.addEventListener('click', function () {
+		if (!selectedInfo || selectedKind !== 'TIMELINE') {
+			log('Seleccioná un clip de video en el timeline primero', true);
+			return;
+		}
+		ensureHost(function () {
+			var sens = shotsSelect.value || 'MediumSensitivity';
+			shotsBtn.disabled = true;
+			shotsBtn.textContent = 'Detectando...';
+			evalJSX('mcDetectShots("' + sens + '")', function (res) {
+				shotsBtn.textContent = 'Detectar cambios de toma';
+				shotsBtn.disabled = false;
+				var s = String(res || '');
+				var bar = s.indexOf('|');
+				var head = bar >= 0 ? s.substring(0, bar) : s;
+				var rest = bar >= 0 ? s.substring(bar + 1) : '';
+				if (head === 'OK') {
+					log(rest || s);
+					setTimeout(function () { refreshClipInfo(false); }, 500);
+				} else if (rest === 'timeout') {
+					log('Error: timeout del host. La detección pudo no completarse; revisá el timeline.', true);
+					refreshClipInfo(false);
+				} else if (bar < 0) {
+					log('Error del host: ' + s, true);
+					refreshClipInfo(false);
+				} else {
+					log('Error: ' + (rest || s), true);
+					refreshClipInfo(false);
+				}
+			}, 180000);
 		}, true);
 	});
 

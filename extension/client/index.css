@@ -181,3 +181,44 @@ tbody td {
 .status.err {
 	color: #ff7b7b;
 }
+
+.shotsBox {
+	padding: 8px 10px;
+	border-top: 1px solid #3a3a3a;
+	background: #1d1d1d;
+}
+
+.shotsTitle {
+	font-size: 12px;
+	font-weight: 600;
+	color: #f0f0f0;
+	margin-bottom: 3px;
+}
+
+.shotsHint {
+	color: #777;
+	font-size: 10px;
+	margin-bottom: 6px;
+}
+
+.shotsRow {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.shotsSelect {
+	flex: 0 0 auto;
+	width: 88px;
+	background: #1d1d1d;
+	border: 1px solid #444;
+	color: #e0e0e0;
+	padding: 6px;
+	font-size: 12px;
+	border-radius: 3px;
+	outline: none;
+}
+
+.shotsSelect:focus {
+	border-color: #7aa7ff;
+}

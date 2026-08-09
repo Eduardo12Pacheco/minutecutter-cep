@@ -595,6 +595,40 @@ function mcCutRanges(rangesStr) {
 	}
 }
 
+function mcDetectShots(sensitivity) {
+	try {
+		if (!app.project) return 'ERR|No hay proyecto abierto';
+		var seq = app.project.activeSequence;
+		if (!seq) return 'ERR|No hay secuencia activa';
+		if (typeof seq.getSelection != 'function') return 'ERR|Este Premiere no expone la seleccion de timeline';
+		var sel = seq.getSelection();
+		if (!sel || sel.numItems < 1) return 'ERR|Seleccioná un clip de video en el timeline (no en el proyecto)';
+		var hasVideo = false;
+		for (var i = 0; i < sel.numItems; i++) {
+			var rec = mcEntryFromTrackItem(sel[i], seq);
+			if (rec && rec.isVideo) { hasVideo = true; break; }
+		}
+		if (!hasVideo) return 'ERR|Seleccioná un clip de video en el timeline (no en el proyecto)';
+		var sens = mcStr(sensitivity);
+		if (sens != 'LowSensitivity' && sens != 'MediumSensitivity' && sens != 'HighSensitivity') sens = 'MediumSensitivity';
+		var legacy = false;
+		if (typeof seq.performSceneEditDetectionOnSelection == 'function') {
+			seq.performSceneEditDetectionOnSelection('ApplyCuts', true, sens);
+		} else if (typeof seq.performCutDetectionOnSelection == 'function') {
+			seq.performCutDetectionOnSelection('ApplyCuts', true, sens);
+			legacy = true;
+		} else {
+			return 'ERR|Este Premiere no expone deteccion de cambios de toma en la seleccion de timeline';
+		}
+		var msg = 'OK|Deteccion ejecutada en la seleccion de timeline';
+		if (legacy) msg += ' (API legacy)';
+		msg += ' con sensibilidad ' + sens + '. Aplica cortes al audio vinculado; no elimina material. Guardá el proyecto y revisá el timeline: la operacion no tiene rollback programatico.';
+		return msg;
+	} catch (e) {
+		return 'ERR|' + mcStr(e);
+	}
+}
+
 function mcPing() {
 	try { return 'PONG|host-loaded'; } catch (e) { return 'ERR|ping'; }
 }

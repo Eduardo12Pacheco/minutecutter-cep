@@ -33,6 +33,19 @@
 	</div>
 	<div id="status" class="status"></div>
 
+	<div class="shotsBox">
+		<div class="shotsTitle">Tomas especiales</div>
+		<div class="shotsHint">Seleccioná un clip de video en el timeline para cortar en cada cambio de toma. No elimina material.</div>
+		<div class="shotsRow">
+			<select id="shotsSensitivity" class="shotsSelect">
+				<option value="LowSensitivity">Baja</option>
+				<option value="MediumSensitivity" selected>Media</option>
+				<option value="HighSensitivity">Alta</option>
+			</select>
+			<button id="shotsBtn" class="btn primary">Detectar cambios de toma</button>
+		</div>
+	</div>
+
 	<script src="index.js"></script>
 </body>
 </html>

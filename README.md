@@ -76,6 +76,31 @@ Panel CEP para Premiere Pro que recorta rangos de un clip de video **directament
 - **Audio / ripple:** el audio vinculado al video seleccionado se corta junto con este. Los clips posteriores se desplazan para cerrar el hueco.
 - **Escala automática 140 %:** cada pedazo conservado se ajusta al tamaño del frame y se le aplica `Scale = 140`.
 
+## Tomas especiales
+
+La sección **Tomas especiales** del panel detecta los cambios de toma dentro del clip de video seleccionado y crea cortes en el timeline, **sin eliminar ningún segmento**.
+
+### Uso
+
+1. Seleccioná explícitamente un **TrackItem de video en el timeline** (la selección debe estar en el timeline, no en el Proyecto).
+2. Elegí la **sensibilidad** de la detección: **Baja** (`LowSensitivity`), **Media** (`MediumSensitivity`, por defecto) o **Alta** (`HighSensitivity`).
+3. Presioná **Detectar cambios de toma**.
+
+La operación aplica cortes al **audio vinculado** del clip. El panel muestra el resultado en la barra inferior y vuelve a leer la selección al terminar. El botón se deshabilita durante la operación y se reactiva al terminar.
+
+### Requisitos
+
+- **Selección explícita de timeline**: esta operación requiere un TrackItem de video seleccionado en el timeline (`seq.getSelection()`). No usa el playhead ni la selección de Proyecto como fallback. Sin una selección de video válida se muestra un error y no se ejecuta nada.
+- Sensibilidad válida: solo `LowSensitivity`, `MediumSensitivity` o `HighSensitivity`. Cualquier otro valor se interpreta como `MediumSensitivity`.
+- **Guardá el proyecto** antes de ejecutar la detección: los cortes se aplican directo al timeline.
+
+### Limitaciones y rollback
+
+- La detección nativa es **modal** (bloquea la UI de Premiere mientras corre) y **no tiene rollback programático**: si el resultado no es el esperado, usá **Ctrl+Z** o restaurá el proyecto guardado.
+- El panel no puede informar cuántos cortes se crearon: la API de Premiere devuelve `boolean`/`undefined` y no hay un conteo confiable.
+- Requiere un build de Premiere que exponga `Sequence.performSceneEditDetectionOnSelection` (o su variante legacy `performCutDetectionOnSelection`). Si el build no la expone, se muestra un error y no se modifica el timeline.
+- La sección **Cortar** (rangos) y la escala 140 % no cambian con esta funcionalidad: son operaciones independientes.
+
 ## Limitaciones conocidas
 
 - Solo se admiten clips a **velocidad 1x (100 %)**. No se admiten velocidad 0, ni velocidad distinta de 1x, ni clips en **reversa**.
