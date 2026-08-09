@@ -12,6 +12,9 @@
 	// --- Bootstrap automático del host (invisible, sin botón Diag) ---
 	var hostReady = false;
 	var booting = false;
+	var pendingBootCbs = [];
+	var bootTimer = null;
+	var BOOT_TIMEOUT_MS = 30000;
 
 	function hostPath() {
 		var root = '';
@@ -52,20 +55,35 @@
 
 	function ensureHost(cb, showLog) {
 		if (hostReady) { cb(); return; }
-		if (booting) return;
 		if (!cep) { log('Extensión sin host CEP', true); return; }
+		if (booting) {
+			pendingBootCbs.push(cb);
+			return;
+		}
 		booting = true;
-		evalJSX(bootstrapScript(), function (res) {
+		pendingBootCbs.push(cb);
+		bootTimer = setTimeout(function () {
+			showHostError('ERR|timeout');
+			if (showLog) log('Error cargando host: timeout', true);
+		}, BOOT_TIMEOUT_MS);
+		cep.evalScript(bootstrapScript(), bootDone);
+	}
+
+	function bootDone(res) {
+		clearTimeout(bootTimer);
+		bootTimer = null;
+		var s = String(res || '').trim();
+		if (s === 'READY') {
+			hostReady = true;
 			booting = false;
-			var s = String(res || '').trim();
-			if (s === 'READY') {
-				hostReady = true;
-				cb();
-			} else {
-				showHostError(s);
-				if (showLog) log('Error cargando host: ' + (s.indexOf('|') >= 0 ? s.substring(s.indexOf('|') + 1) : s), true);
-			}
-		}, 10000);
+			var cbs = pendingBootCbs;
+			pendingBootCbs = [];
+			for (var i = 0; i < cbs.length; i++) cbs[i]();
+			return;
+		}
+		booting = false;
+		showHostError(s);
+		pendingBootCbs = [];
 	}
 
 	function log(msg, isErr) {
