@@ -336,18 +336,22 @@ function mcUnselectedLinkedAudio(seq, mStart, mEnd, mIn, group) {
 	return false;
 }
 
-function mcCollectAfter(seq, mEnd) {
+function mcCollectAfterSelectedTracks(groupSnap, mEnd) {
 	var out = [];
-	var vv, cc, tracks, track, c, s;
-	for (vv = 0; vv < 2; vv++) {
-		tracks = vv == 0 ? seq.videoTracks : seq.audioTracks;
-		for (cc = 0; cc < tracks.numTracks; cc++) {
-			track = tracks[cc];
-			for (var j = 0; j < track.clips.numItems; j++) {
-				c = track.clips[j];
-				s = mcSec(c.start);
-				if (!isNaN(s) && s >= mEnd - 0.01) out.push({ item: c, start: s });
-			}
+	var seen = [];
+	var i, j, k, found, track, c, s;
+	for (i = 0; i < groupSnap.length; i++) {
+		track = groupSnap[i].track;
+		found = false;
+		for (k = 0; k < seen.length; k++) {
+			if (seen[k] == track) { found = true; break; }
+		}
+		if (found) continue;
+		seen.push(track);
+		for (j = 0; j < track.clips.numItems; j++) {
+			c = track.clips[j];
+			s = mcSec(c.start);
+			if (!isNaN(s) && s >= mEnd - 0.01) out.push({ item: c, start: s });
 		}
 	}
 	return out;
@@ -483,7 +487,7 @@ function mcCutRanges(rangesStr) {
 			}
 			groupSnap.push({ item: git, track: group[gs].track, start: gStart, inPoint: gIn, projectItem: gpi, isVideo: group[gs].isVideo });
 		}
-		var shiftSnap = mcCollectAfter(seq, mEnd);
+		var shiftSnap = mcCollectAfterSelectedTracks(groupSnap, mEnd);
 		if (shiftSnap.length > 0 && typeof shiftSnap[0].item.move != 'function') {
 			return 'ERR|Este build no expone TrackItem.move; no se puede cerrar el hueco de forma segura';
 		}

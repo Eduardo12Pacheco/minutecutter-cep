@@ -11,7 +11,7 @@ Panel CEP para Premiere Pro que recorta rangos de un clip de video **directament
   2. Elimina el clip original (video y audio vinculado).
   3. Inserta los subclips en la posición original.
   4. Aplica **escala automática 140 %** a cada pedazo.
-  5. Corre los clips posteriores para cerrar el hueco (ripple).
+  5. Corre los clips posteriores de las pistas del clip seleccionado (video + audio vinculado) para cerrar el hueco (ripple).
 
 ## Hosts soportados
 
@@ -73,8 +73,17 @@ Panel CEP para Premiere Pro que recorta rangos de un clip de video **directament
 
 ## Detalles de comportamiento
 
-- **Audio / ripple:** el audio vinculado al video seleccionado se corta junto con este. Los clips posteriores se desplazan para cerrar el hueco.
+- **Audio / corte:** el audio vinculado al video seleccionado se corta junto con este.
 - **Escala automática 140 %:** cada pedazo conservado se ajusta al tamaño del frame y se le aplica `Scale = 140`.
+
+### Semántica del ripple (cierre de hueco)
+
+El cierre de hueco tras el corte está **limitado a las pistas del clip seleccionado**: la pista de video donde está el clip y las pistas de audio vinculadas seleccionadas. Solo esos clips posteriores al corte (los que empiezan en o después del fin del clip) se desplazan hacia la izquierda para cerrar el hueco.
+
+- Los clips de **otras pistas** (p. ej. V2–V9, A2 o superior) **quedan fijos**, sin importar si empiezan después del corte. Esto evita mover material ajeno al clip que se está cortando.
+- Como consecuencia, si tenías clips de otras pistas alineados temporalmente con los de la pista del clip cortado, el hueco cerrado deja **espacios relativos** entre esas pistas. Si querés mantener el alineado, alinealos nuevamente después del corte.
+- Si el clip seleccionado no tiene audio vinculado, el ripple solo se aplica a su pista de video.
+- Los overlays, logos, textos y cualquier otro clip de pistas no seleccionadas no se mueven.
 
 ## Limitaciones conocidas
 
