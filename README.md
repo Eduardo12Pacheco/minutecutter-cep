@@ -1,6 +1,8 @@
 # Minute Cutter — Panel CEP para Premiere Pro
 
-Panel CEP para Premiere Pro que recorta rangos de un clip de video **directamente desde el material fuente** (tiempos de fuente, no de timeline) en una sola operación, con corte de audio vinculado, cierre del hueco (ripple) y escala automática de los pedazos resultantes.
+Panel CEP para Premiere Pro que recorta rangos de un clip de video **directamente desde el material fuente** (tiempos de fuente, no de timeline) en una sola operación, con corte de audio vinculado y escala automática de los pedazos resultantes.
+
+> **Modo sin ripple:** esta rama (`fix/no-ripple-other-clips`) **conserva la posición absoluta de los clips posteriores** en todas las pistas. Solo se corta el clip seleccionado (video + audio vinculado) y sus pedazos quedan contiguos; **no se mueve ningún clip posterior** y **puede quedar un hueco** tras el corte.
 
 ## Qué hace
 
@@ -9,9 +11,9 @@ Panel CEP para Premiere Pro que recorta rangos de un clip de video **directament
 - Al presionar **Cortar**, la extensión:
   1. Crea un *subclip* por cada rango conservado (basado en el material fuente del clip).
   2. Elimina el clip original (video y audio vinculado).
-  3. Inserta los subclips en la posición original.
+  3. Inserta los subclips en la posición original, contiguos entre sí.
   4. Aplica **escala automática 140 %** a cada pedazo.
-  5. Corre los clips posteriores para cerrar el hueco (ripple).
+  5. **No** corre los clips posteriores de ninguna pista: conserva sus posiciones absolutas y puede dejar un hueco después del corte.
 
 ## Hosts soportados
 
@@ -73,7 +75,7 @@ Panel CEP para Premiere Pro que recorta rangos de un clip de video **directament
 
 ## Detalles de comportamiento
 
-- **Audio / ripple:** el audio vinculado al video seleccionado se corta junto con este. Los clips posteriores se desplazan para cerrar el hueco.
+- **Audio / sin ripple:** el audio vinculado al video seleccionado se corta junto con este. Los pedazos resultantes se insertan contiguos en la posición original. **No se ejecuta `TrackItem.move` sobre material posterior**: los clips de V1/A1/V2/A2 que arrancan después del clip seleccionado **no cambian su start absoluto**, por lo que el corte **puede dejar un hueco** entre el último pedazo y el clip siguiente.
 - **Escala automática 140 %:** cada pedazo conservado se ajusta al tamaño del frame y se le aplica `Scale = 140`.
 
 ## Limitaciones conocidas
@@ -81,7 +83,7 @@ Panel CEP para Premiere Pro que recorta rangos de un clip de video **directament
 - Solo se admiten clips a **velocidad 1x (100 %)**. No se admiten velocidad 0, ni velocidad distinta de 1x, ni clips en **reversa**.
 - Una **selección de Proyecto** (BIN) sin instancia en el timeline no se puede cortar: primero debe existir una instancia del clip en el timeline. En ese caso el panel avisa que primero hay que insertarlo.
 - Si hay **audio sincronizado no seleccionado** en la posición del clip, el corte se rechaza y se pide seleccionar video + audio juntos.
-- Depende de que el host exponga ciertas APIs (crear subclips, remover/insertar clips, mover). Si el build no las expone, el corte se aborta con un mensaje claro y sin tocar el timeline (o reintentando restaurar, con aviso de usar Ctrl+Z si el rollback quedó incompleto).
+- Depende de que el host exponga ciertas APIs (crear subclips, remover/insertar clips). Si el build no las expone, el corte se aborta con un mensaje claro y sin tocar el timeline (o reintentando restaurar, con aviso de usar Ctrl+Z si el rollback quedó incompleto). Este modo **no requiere** `TrackItem.move`.
 
 ## Volver a una versión estable
 

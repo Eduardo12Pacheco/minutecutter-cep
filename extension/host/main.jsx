@@ -483,10 +483,6 @@ function mcCutRanges(rangesStr) {
 			}
 			groupSnap.push({ item: git, track: group[gs].track, start: gStart, inPoint: gIn, projectItem: gpi, isVideo: group[gs].isVideo });
 		}
-		var shiftSnap = mcCollectAfter(seq, mEnd);
-		if (shiftSnap.length > 0 && typeof shiftSnap[0].item.move != 'function') {
-			return 'ERR|Este build no expone TrackItem.move; no se puede cerrar el hueco de forma segura';
-		}
 		var keptTimeline = 0;
 		for (var kt = 0; kt < ranges.length; kt++) keptTimeline += (ranges[kt][1] - ranges[kt][0]) / speed;
 		var removedTimeline = (mEnd - mStart) - keptTimeline;
@@ -559,36 +555,14 @@ function mcCutRanges(rangesStr) {
 			}
 			return 'ERR|Fallo al insertar pedazos: ' + mcStr(insertFail) + (rb2.length ? ' (rollback incompleto: ' + rb2.join('; ') + '; usa Ctrl+Z)' : ' (rollback completo)');
 		}
-		var shiftFail = 0;
 		var pI, itm, okSc;
 		for (pI = 0; pI < pieces.length; pI++) {
 			itm = mcFindByStart(pieces[pI].track, pieces[pI].timeSec);
 			okSc = pieces[pI].scaleOk && mcApplyScale(itm);
 			if (!okSc) scaleWarn++;
 		}
-		var sh, sit, target, before, mt, vf, expect, actual;
-		if (removedTimeline > 0.001) {
-			for (sh = 0; sh < shiftSnap.length; sh++) {
-				sit = shiftSnap[sh].item;
-				target = shiftSnap[sh].start - removedTimeline;
-				try {
-					before = mcSec(sit.start);
-					if (isNaN(before) || Math.abs(before - target) > 0.05) {
-						mt = new Time();
-						mt.seconds = -removedTimeline;
-						sit.move(mt);
-					}
-				} catch (e) { shiftFail++; }
-			}
-			for (vf = 0; vf < shiftSnap.length; vf++) {
-				expect = shiftSnap[vf].start - removedTimeline;
-				actual = mcSec(shiftSnap[vf].item.start);
-				if (isNaN(actual) || Math.abs(actual - expect) > 0.05) shiftFail++;
-			}
-		}
-		var msg = 'OK|Corte realizado en ' + ranges.length + ' pedazo(s)';
+		var msg = 'OK|Corte realizado en ' + ranges.length + ' pedazo(s) sin mover material posterior';
 		if (scaleWarn > 0) msg += ' | aviso: no se pudo aplicar escala 140 en ' + scaleWarn + ' pedazo(s)';
-		if (shiftFail > 0) msg += ' | ' + shiftFail + ' clip(s) posteriores no quedaron alineados; revisa el hueco';
 		return msg;
 	} catch (e) {
 		return 'ERR|' + mcStr(e);
