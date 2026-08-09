@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" font-family="Segoe UI, Arial, sans-serif" role="img" aria-labelledby="title desc">
+  <title id="title">Instalación de MinuteCutter</title>
+  <desc id="desc">Flujo: repositorio de GitHub, carpeta extension, carpeta CEP, panel en Premiere</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6b7a90"/>
+    </marker>
+    <linearGradient id="gh" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#24292f"/>
+      <stop offset="1" stop-color="#3a4350"/>
+    </linearGradient>
+    <linearGradient id="cep" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5a2ea6"/>
+      <stop offset="1" stop-color="#7d4fd1"/>
+    </linearGradient>
+    <linearGradient id="pr" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1e5aa8"/>
+      <stop offset="1" stop-color="#2f7bd4"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="330" rx="18" fill="#10141c"/>
+
+  <text x="450" y="40" text-anchor="middle" fill="#e8eef7" font-size="20" font-weight="700">Instalación — del repositorio al panel</text>
+
+  <!-- 1 GitHub -->
+  <g>
+    <rect x="40" y="84" width="180" height="150" rx="12" fill="url(#gh)"/>
+    <g transform="translate(110 120)">
+      <ellipse cx="0" cy="0" rx="17" ry="17" fill="none" stroke="#c8d1dc" stroke-width="2.5"/>
+      <path d="M0 -8 L0 8 M-8 0 L8 0" stroke="#c8d1dc" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+    <text x="130" y="178" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="600">GitHub</text>
+    <text x="130" y="198" text-anchor="middle" fill="#c8d1dc" font-size="10">clonar o ZIP</text>
+    <text x="130" y="214" text-anchor="middle" fill="#c8d1dc" font-size="10">minutecutter-cep</text>
+  </g>
+
+  <line x1="228" y1="159" x2="276" y2="159" stroke="#6b7a90" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- 2 extension -->
+  <g>
+    <rect x="284" y="84" width="180" height="150" rx="12" fill="#1c2534"/>
+    <text x="374" y="126" text-anchor="middle" fill="#8fd6ac" font-size="12" font-weight="600">extension\</text>
+    <text x="374" y="152" text-anchor="middle" fill="#c3cede" font-size="10">CSXS\manifest.xml</text>
+    <text x="374" y="170" text-anchor="middle" fill="#c3cede" font-size="10">client\index.html</text>
+    <text x="374" y="188" text-anchor="middle" fill="#c3cede" font-size="10">client\index.css</text>
+    <text x="374" y="206" text-anchor="middle" fill="#c3cede" font-size="10">client\index.js</text>
+    <text x="374" y="224" text-anchor="middle" fill="#c3cede" font-size="10">host\main.jsx</text>
+  </g>
+
+  <line x1="472" y1="159" x2="520" y2="159" stroke="#6b7a90" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- 3 CEP -->
+  <g>
+    <rect x="528" y="84" width="180" height="150" rx="12" fill="url(#cep)"/>
+    <text x="618" y="122" text-anchor="middle" fill="#e6d6ff" font-size="11" font-weight="600">%APPDATA%\Adobe\</text>
+    <text x="618" y="138" text-anchor="middle" fill="#e6d6ff" font-size="11" font-weight="600">CEP\extensions\</text>
+    <text x="618" y="154" text-anchor="middle" fill="#e6d6ff" font-size="11" font-weight="600">com.pelot.minutecutter\</text>
+    <rect x="546" y="168" width="144" height="30" rx="6" fill="#1c1030"/>
+    <text x="618" y="188" text-anchor="middle" fill="#c9a9ff" font-size="9">copiar el CONTENIDO,</text>
+    <text x="618" y="216" text-anchor="middle" fill="#c9a9ff" font-size="9">sin doble carpeta</text>
+  </g>
+
+  <line x1="716" y1="159" x2="764" y2="159" stroke="#6b7a90" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- 4 Premiere -->
+  <g>
+    <rect x="772" y="84" width="90" height="150" rx="12" fill="url(#pr)"/>
+    <rect x="790" y="110" width="54" height="34" rx="4" fill="#0d1830" opacity="0.6"/>
+    <path d="M790 120 L820 120 M790 128 L812 128 M790 136 L816 136" stroke="#9fc0ee" stroke-width="2"/>
+    <text x="817" y="172" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="600">Premiere</text>
+    <text x="817" y="188" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="600">Pro</text>
+    <text x="817" y="214" text-anchor="middle" fill="#bcd6f5" font-size="8">Window &gt;</text>
+    <text x="817" y="226" text-anchor="middle" fill="#bcd6f5" font-size="8">Extensions</text>
+  </g>
+
+  <!-- Nota PlayerDebugMode -->
+  <rect x="40" y="256" width="822" height="48" rx="12" fill="#3a2e1e"/>
+  <text x="451" y="276" text-anchor="middle" fill="#f5d6a4" font-size="12" font-weight="600">una sola vez: PlayerDebugMode = 1 bajo HKCU\Software\Adobe\CSXS.11</text>
+  <text x="451" y="295" text-anchor="middle" fill="#ecd3ad" font-size="10">luego reiniciá Premiere · panel en Window &gt; Extensions &gt; Minute Cutter</text>
+</svg>
